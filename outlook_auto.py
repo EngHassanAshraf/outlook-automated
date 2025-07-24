@@ -88,6 +88,7 @@ def outlook_folder(folder_name):
 
 def main():
     inbox = outlook_folder("Inbox")
+    archive = outlook_folder("Archive")
     ignored_files = [
         "EmailSignature-International_N_374acb21-a63f-4e28-ac6f-11c4b255b559.jpg",
         "fb-resized_1_08ab0129-1fbf-4e09-9caf-52e1f3fb8718.png",
@@ -172,7 +173,6 @@ def main():
         "image038.jpg",
         "image039.jpg",
     ]
-
     for item in inbox.Items:
         if (
             "الحالة الفنية" in str(item.subject)
@@ -197,11 +197,16 @@ def main():
         ):
             save_attachments(item, "Daily Report", ignored_files)
 
-        elif "تعيين جديد" in str(item.subject):
+        elif (
+            "تعيين" in str(item.subject)
+            or "تعين" in str(item.subject)
+            or "وثقية" in str(item.subject)
+        ):
             save_attachments(item, "أوراق الموظفين", ignored_files)
-
         else:
             save_attachments(item, "Others", ignored_files)
+
+        item.Move(archive)
 
 
 if __name__ == "__main__":
