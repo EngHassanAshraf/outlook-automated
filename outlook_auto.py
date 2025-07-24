@@ -78,14 +78,16 @@ def save_attachments(item, report_type, ignored_files):
             attachment.SaveAsFile(final_path)
 
 
-def outlook_folder(folder_number):
+def outlook_folder(folder_name):
     outlook_connection = Dispatch("Outlook.Application").GetNamespace("MAPI")
-    folder = outlook_connection.GetDefaultFolder(folder_number)
+    folder = outlook_connection.Folders(
+        "Security.Information@mountainview-eg.com"
+    ).Folders(folder_name)
     return folder
 
 
 def main():
-    inbox = outlook_folder(6)
+    inbox = outlook_folder("Inbox")
     ignored_files = [
         "EmailSignature-International_N_374acb21-a63f-4e28-ac6f-11c4b255b559.jpg",
         "fb-resized_1_08ab0129-1fbf-4e09-9caf-52e1f3fb8718.png",
@@ -100,36 +102,36 @@ def main():
         "image007.png",
         "image008.png",
         "image009.png",
-        "image0010.png",
-        "image0011.png",
-        "image0012.png",
-        "image0013.png",
-        "image0014.png",
-        "image0015.png",
-        "image0016.png",
-        "image0017.png",
-        "image0018.png",
-        "image0019.png",
-        "image0020.png",
-        "image0021.png",
-        "image0022.png",
-        "image0023.png",
-        "image0024.png",
-        "image0025.png",
-        "image0026.png",
-        "image0027.png",
-        "image0028.png",
-        "image0029.png",
-        "image0030.png",
-        "image0031.png",
-        "image0032.png",
-        "image0033.png",
-        "image0034.png",
-        "image0035.png",
-        "image0036.png",
-        "image0037.png",
-        "image0038.png",
-        "image0039.png",
+        "image010.png",
+        "image011.png",
+        "image012.png",
+        "image013.png",
+        "image014.png",
+        "image015.png",
+        "image016.png",
+        "image017.png",
+        "image018.png",
+        "image019.png",
+        "image020.png",
+        "image021.png",
+        "image022.png",
+        "image023.png",
+        "image024.png",
+        "image025.png",
+        "image026.png",
+        "image027.png",
+        "image028.png",
+        "image029.png",
+        "image030.png",
+        "image031.png",
+        "image032.png",
+        "image033.png",
+        "image034.png",
+        "image035.png",
+        "image036.png",
+        "image037.png",
+        "image038.png",
+        "image039.png",
         "image001.jpg",
         "image002.jpg",
         "image003.jpg",
@@ -139,41 +141,42 @@ def main():
         "image007.jpg",
         "image008.jpg",
         "image009.jpg",
-        "image0010.jpg",
-        "image0011.jpg",
-        "image0012.jpg",
-        "image0013.jpg",
-        "image0014.jpg",
-        "image0015.jpg",
-        "image0016.jpg",
-        "image0017.jpg",
-        "image0018.jpg",
-        "image0019.jpg",
-        "image0020.jpg",
-        "image0021.jpg",
-        "image0022.jpg",
-        "image0023.jpg",
-        "image0024.jpg",
-        "image0025.jpg",
-        "image0026.jpg",
-        "image0027.jpg",
-        "image0028.jpg",
-        "image0029.jpg",
-        "image0030.jpg",
-        "image0031.jpg",
-        "image0032.jpg",
-        "image0033.jpg",
-        "image0034.jpg",
-        "image0035.jpg",
-        "image0036.jpg",
-        "image0037.jpg",
-        "image0038.jpg",
-        "image0039.jpg",
+        "image010.jpg",
+        "image011.jpg",
+        "image012.jpg",
+        "image013.jpg",
+        "image014.jpg",
+        "image015.jpg",
+        "image016.jpg",
+        "image017.jpg",
+        "image018.jpg",
+        "image019.jpg",
+        "image020.jpg",
+        "image021.jpg",
+        "image022.jpg",
+        "image023.jpg",
+        "image024.jpg",
+        "image025.jpg",
+        "image026.jpg",
+        "image027.jpg",
+        "image028.jpg",
+        "image029.jpg",
+        "image030.jpg",
+        "image031.jpg",
+        "image032.jpg",
+        "image033.jpg",
+        "image034.jpg",
+        "image035.jpg",
+        "image036.jpg",
+        "image037.jpg",
+        "image038.jpg",
+        "image039.jpg",
     ]
 
     for item in inbox.Items:
         if (
             "الحالة الفنية" in str(item.subject)
+            or "weekly" in str(item.subject)
             or "technical" in str(item.subject).lower()
         ):
             save_attachments(item, "Tech Report", ignored_files)
@@ -189,6 +192,7 @@ def main():
         elif (
             "اليومي" in str(item.subject)
             or "اليومى" in str(item.subject)
+            or "الحالة الأمنية" in str(item.subject)
             or "daily" in str(item.subject).lower()
         ):
             save_attachments(item, "Daily Report", ignored_files)
