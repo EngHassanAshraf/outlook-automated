@@ -126,7 +126,7 @@ class Attachment:
         return str(self.attachment.filename) in ignored_files
 
     def accepted_type(self):
-        ext = ["docx", "pdf", "xlsx"]
+        ext = ["docx", "pdf", "xlsx", "pptx"]
         attachment_type = str(self.attachment.filename).split(".")[-1]
         return attachment_type in ext
 
@@ -144,7 +144,8 @@ class Attachment:
         date_list = init_date.split("-")
         month_number = None
         if len(date_list) >= 3:
-            month_number = int(init_date.split("-")[-2])
+            month_number = init_date.split("-")[-2] or 0
+            month_number = int(month_number)
 
         if month_number not in [month for month in range(1, 13)]:
             month_number = item.ReceivedTime.month

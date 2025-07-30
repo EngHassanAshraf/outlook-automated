@@ -52,21 +52,19 @@ def main():
     output_dir = Path(f"D:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for item in list(archive.items):
-
+    for item in list(inbox.items):
         category, sub_category = generate_category(str(item.subject))
-        compound = (
-            str(item.sender)
-            .lower()
-            .replace(" security", "")
-            .replace(" buildingsecurity", "")
-            .upper()
-        )
-
         try:
+            compound = (
+                str(item.sender)
+                .lower()
+                .replace(" security", "")
+                .replace(" buildingsecurity", "")
+                .upper()
+            )
             message = Message(item)
             if compound == "CONDOLENCES":
-                # message.move_message(folder=archive)
+                message.move_message(folder=archive)
                 continue
 
             attachments = message.get_message_attachments()
@@ -86,8 +84,9 @@ def main():
                     )
                     file_path = attachment_instance.attachment_folder(folder_path)
                     attachment_instance.save_attachment(file_path=file_path)
-            # message.move_message(folder=archive)
+            message.move_message(folder=archive)
         except Exception as e:
+            print(item.subject)
             print(e)
 
 
