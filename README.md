@@ -3,7 +3,7 @@
 ## Description
 
 An application to help me automate the daily boring stuff like saving emails' attachments and archiving emails
-from different senders ,so i used the  ```bash Dispatch from win32com.client```
+from different senders ,so i used the ```Dispatch from win32com.client```
 
 ## Pywin32 Package
 
