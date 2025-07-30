@@ -4,6 +4,8 @@
 
 A python tool helps me automating the daily boring stuff like saving emails' attachments and archiving emails
 from different senders
+> [!Note]
+> This tool is still under development and testing so that in some lines there is a hard coded conditions and folder names, there will be a user inputs to enter and select different things
 
 ## Pywin32 Package
 
