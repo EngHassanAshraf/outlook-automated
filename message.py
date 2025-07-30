@@ -165,23 +165,3 @@ class Attachment:
             self.attachment.SaveAsFile(file_path)
         elif not self.accepted_type():
             print(f"Unsupported Attachment Type. '{self.attachment.filename}' ")
-
-
-# I need to think about this function implementation place
-
-# def get_contents(self, root_folder=None, folder_name=None, folder_number=None):
-#     if root_folder and folder_name:
-#         return self.get_folder(root_folder, folder_name).items
-#     elif folder_number:
-#         return self.get_default_folder(folder_number)
-
-# def create_folder(path):
-#     """Create a folder from the given path
-
-#     Args:
-#         attachment_path (str): full attachment path
-
-#     Returns:
-#         str: folder absolute path
-#     """
-#     pass

@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import date
 
 from application import Connection, Folder
-from content import Message, Attachment, AttachmentPath
+from message import Message, Attachment, AttachmentPath
 
 
 def generate_category(subject):
