@@ -13,6 +13,6 @@ Using **win32com** lib from the [pywin32](https://pypi.org/project/pywin32/) pac
 
 ## Future Features
 
-- [X] Save emails' attachments
+- [ ] Save emails' attachments dependant on user inputs
 - [ ] Read each attachment, parse its content and gather useful data
 - [ ] Use gathered data to make weekly useful Excel sheets
