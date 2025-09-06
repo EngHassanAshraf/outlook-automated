@@ -27,10 +27,30 @@ class Message:
         else unread is False by default so that move onle the message  if it's read
         """
 
-        if unread:
-            self.message.Move(folder)
-        elif not self.message.unread:
-            self.message.Move(folder)
+        try:
+            if unread:
+                while True:
+                    confirm = input(
+                        "Warning: Unread Messages will be moved too! (y/N): "
+                    )
+                    if confirm == "y" or confirm == "Y":
+                        self.message.Move(folder)
+                        print(f"Email moved to {folder}")
+                        return
+                    elif confirm == "n" or confirm == "N":
+                        unread = False
+                        if not self.message.unread:
+                            self.message.Move(folder)
+                            print(f"Email moved to {folder}")
+                            return
+                        break
+            else:
+                if not self.message.unread:
+                    self.message.Move(folder)
+                    print(f"Email moved to {folder}")
+                    return
+        except Exception as e:
+            print(f"Faced error while trying to move the email to {folder}: {e}")
 
 
 class Attachment:

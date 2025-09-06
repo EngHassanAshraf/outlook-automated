@@ -8,10 +8,19 @@ class Connection:
         self.namespace = namesapce
 
     def connect(self):
-        return Dispatch(self.application)
+        try:
+            print("Connecting\n")
+            d = Dispatch(self.application)
+            print("Connected Successfully")
+            return d
+        except Exception as e:
+            print(f"Faced an error while connecting: {e}")
 
     def get_namespace(self):
-        return self.connect().GetNameSpace(self.namespace)
+        try:
+            return self.connect().GetNameSpace(self.namespace)
+        except Exception as e:
+            print(f"Faced an error while getting the namespace: {e}")
 
 
 class Folder:
@@ -19,7 +28,15 @@ class Folder:
         self.namespace = namespace
 
     def get_default_folder(self, folder_number):
-        return self.namespace.GetDefaultFolder(folder_number)
+        try:
+            print(f"Folder {folder_number} opened")
+            return self.namespace.GetDefaultFolder(folder_number)
+        except Exception as e:
+            print("Faced an error while openning the folder: {e}")
 
     def get_folder(self, root_folder, folder_name):
-        return self.namespace.Folders(root_folder).Folders(folder_name)
+        try:
+            print(f"Folder {root_folder}.{folder_name} opened")
+            return self.namespace.Folders(root_folder).Folders(folder_name)
+        except Exception as e:
+            print("Faced an error while openning the folder: {e}")

@@ -30,7 +30,7 @@ def generate_category(subject):
         or "daily" in subject.lower()
     ):
         category = "Daily Report - التقرير اليومي"
-        if "mv3" in subject.lower() or "السخنة" in subject:
+        if "لموقع Mv3" in subject or "السخنة" in subject:
             sub_category = category
 
     elif "تعيين" in subject or "تعين" in subject or "وثقية" in subject:
@@ -49,7 +49,7 @@ def main():
     inbox = outlook_folders.get_default_folder(folder_number=6)
     archive = outlook_folders.get_folder(root_folder="Archives", folder_name="Archive")
 
-    output_dir = Path(f"D:\\MV\\MV-{date.today().year}\\")
+    output_dir = Path(f"E:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for item in list(inbox.items):
@@ -92,3 +92,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("Done")
