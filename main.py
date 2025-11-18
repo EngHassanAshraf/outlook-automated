@@ -4,6 +4,8 @@ from datetime import date
 from application import Connection, Folder
 from message import Message, Attachment, AttachmentPath
 
+import sys
+
 
 def generate_category(subject):
     category = None
@@ -49,10 +51,18 @@ def main():
     inbox = outlook_folders.get_default_folder(folder_number=6)
     archive = outlook_folders.get_folder(root_folder="Archives", folder_name="Archive")
 
-    output_dir = Path(f"E:\\MV\\MV-{date.today().year}\\")
+    # get the partition to save to from the user input
+    if len(sys.argv) > 1:
+        save_partition = sys.argv[1]
+    else:
+        save_partition = input("\nPlease Enter the Partition to save to: ")
+
+    unread = input("\nSave and Archive unread mails? Y(es)/N(o): ")
+
+    output_dir = Path(f"{save_partition}:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for item in list(inbox.items):
+    for item in list(inbox.items):  # type: ignore
         category, sub_category = generate_category(str(item.subject))
         try:
             compound = (
@@ -64,7 +74,10 @@ def main():
             )
             message = Message(item)
             if compound == "CONDOLENCES":
-                message.move_message(folder=archive)
+                message.move_message(
+                    folder=archive,
+                    unread=(True if unread == "Y" else False),
+                )
                 continue
 
             attachments = message.get_message_attachments()
@@ -84,7 +97,10 @@ def main():
                     )
                     file_path = attachment_instance.attachment_folder(folder_path)
                     attachment_instance.save_attachment(file_path=file_path)
-            message.move_message(folder=archive)
+            message.move_message(
+                folder=archive,
+                unread=(True if unread == "Y" else False),
+            )
         except Exception as e:
             print(item.subject)
             print(e)

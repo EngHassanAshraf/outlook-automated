@@ -29,26 +29,11 @@ class Message:
 
         try:
             if unread:
-                while True:
-                    confirm = input(
-                        "Warning: Unread Messages will be moved too! (y/N): "
-                    )
-                    if confirm == "y" or confirm == "Y":
-                        self.message.Move(folder)
-                        print(f"Email moved to {folder}")
-                        return
-                    elif confirm == "n" or confirm == "N":
-                        unread = False
-                        if not self.message.unread:
-                            self.message.Move(folder)
-                            print(f"Email moved to {folder}")
-                            return
-                        break
-            else:
-                if not self.message.unread:
-                    self.message.Move(folder)
-                    print(f"Email moved to {folder}")
-                    return
+                self.message.Move(folder)
+                print(f"{self.message.subject} attachments saved and moved to {folder}")
+            elif not self.message.unread:
+                self.message.Move(folder)
+                print(f"{self.message.subject} attachments saved moved to {folder}")
         except Exception as e:
             print(f"Faced error while trying to move the email to {folder}: {e}")
 
