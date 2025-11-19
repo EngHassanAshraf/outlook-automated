@@ -58,12 +58,16 @@ def main():
     if len(sys.argv) > 1:
         save_partition = str(sys.argv[1]).upper()
     else:
-        save_partition = input("\n👌 Please Enter the Partition to save to: ").upper()
+        save_partition = input(
+            "\n👌 Please Enter partition letter to save to: "
+        ).upper()
 
     partitions_letters = get_partitions_letters()
     while save_partition not in partitions_letters:
         print(f"\n😴 Available Partitions are {partitions_letters}")
-        save_partition = input("👌 Please Enter a valid Partition to save to: ").upper()
+        save_partition = input(
+            "👌 Please, Enter a valid Partition Letter to save to: "
+        ).upper()
         print()
 
     unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
