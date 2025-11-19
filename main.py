@@ -125,7 +125,11 @@ def main():
         except Exception as e:
             print(f"\n🤯 {e}\n")
 
+    if unread == "Y":
+        print("\n🎊 All mails moved to Archive folder and its attachments saved\n")
+    else:
+        print("\n🎊 All read mails moved to Archive folder and its attachments saved\n")
+
 
 if __name__ == "__main__":
     main()
-    print("\n🎊 All mails moved to Archive folder and its attachments saved\n")
