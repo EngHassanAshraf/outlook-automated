@@ -30,12 +30,12 @@ class Message:
         try:
             if unread:
                 self.message.Move(folder)
-                print(f"{self.message.subject} attachments saved and moved to {folder}")
+                print(f"\t☑️ {self.message.subject}")
             elif not self.message.unread:
                 self.message.Move(folder)
-                print(f"{self.message.subject} attachments saved moved to {folder}")
+                print(f"\t☑️ {self.message.subject}")
         except Exception as e:
-            print(f"Faced error while trying to move the email to {folder}: {e}")
+            print(f"\n🤯 Faced error while trying to move the email to {folder}: {e}\n")
 
 
 class Attachment:
@@ -169,4 +169,4 @@ class Attachment:
         if not self.is_ignored() and self.accepted_type():
             self.attachment.SaveAsFile(file_path)
         elif not self.accepted_type():
-            print(f"Unsupported Attachment Type. '{self.attachment.filename}' ")
+            print(f"\n⁉️ Unsupported Attachment Type. '{self.attachment.filename}'\n")

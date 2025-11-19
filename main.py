@@ -4,6 +4,7 @@ from datetime import date
 from application import Connection, Folder
 from message import Message, Attachment, AttachmentPath
 
+import psutil
 import sys
 
 
@@ -43,21 +44,37 @@ def generate_category(subject):
     return (category, sub_category)
 
 
+def get_partitions_letters():
+    partitions = psutil.disk_partitions()
+    partitions_letters = []
+    for partition in partitions:
+        partitions_letters.append(partition.mountpoint.replace(":\\", ""))
+
+    return partitions_letters
+
+
 def main():
+    # get the partition to save to from the user input
+    if len(sys.argv) > 1:
+        save_partition = str(sys.argv[1]).upper()
+    else:
+        save_partition = input("\n👌 Please Enter the Partition to save to: ").upper()
+
+    partitions_letters = get_partitions_letters()
+    while save_partition not in partitions_letters:
+        print(f"\n😴 Available Partitions are {partitions_letters}")
+        save_partition = input("👌 Please Enter a valid Partition to save to: ").upper()
+        print()
+
+    unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
+    print()
+
     connect = Connection("Outlook.Application", "MAPI")
     outlook_namespace = connect.get_namespace()
     outlook_folders = Folder(outlook_namespace)
 
     inbox = outlook_folders.get_default_folder(folder_number=6)
     archive = outlook_folders.get_folder(root_folder="Archives", folder_name="Archive")
-
-    # get the partition to save to from the user input
-    if len(sys.argv) > 1:
-        save_partition = sys.argv[1]
-    else:
-        save_partition = input("\nPlease Enter the Partition to save to: ")
-
-    unread = input("\nSave and Archive unread mails? Y(es)/N(o): ")
 
     output_dir = Path(f"{save_partition}:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -102,10 +119,9 @@ def main():
                 unread=(True if unread == "Y" else False),
             )
         except Exception as e:
-            print(item.subject)
-            print(e)
+            print(f"\n🤯 {e}\n")
 
 
 if __name__ == "__main__":
     main()
-    print("Done")
+    print("\n🎊 All mails moved to Archive folder and its attachments saved\n")
