@@ -2,7 +2,6 @@ from win32com.client import Dispatch
 
 
 class Connection:
-
     def __init__(self, application, namesapce):
         self.application = application
         self.namespace = namesapce

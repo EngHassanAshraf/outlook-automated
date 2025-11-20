@@ -30,10 +30,9 @@ class Message:
         try:
             if unread:
                 self.message.Move(folder)
-                print(f"\t☑️ {self.message.subject}")
             elif not self.message.unread:
                 self.message.Move(folder)
-                print(f"\t☑️ {self.message.subject}")
+            print(f"\t☑️ {self.message.subject}")
         except Exception as e:
             print(f"\n🤯 Faced error while trying to move the email to {folder}: {e}\n")
 

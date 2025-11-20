@@ -8,9 +8,19 @@ import psutil
 import sys
 
 
+def get_partitions_letters():
+    partitions = psutil.disk_partitions()
+    partitions_letters = []
+    for partition in partitions:
+        partitions_letters.append(partition.mountpoint.replace(":\\", ""))
+
+    return partitions_letters
+
+
 def generate_category(subject):
     category = None
     sub_category = None
+
     if "الحالة الفنية" in subject or "technical" in subject.lower():
         category = "Technical Report - التقرير الفني"
 
@@ -36,21 +46,29 @@ def generate_category(subject):
         if "لموقع Mv3" in subject or "السخنة" in subject:
             sub_category = category
 
+    elif (
+        "الشركة" in subject
+        or "شركة" in subject
+        or "الشركه" in subject
+        or "شركه" in subject
+        or "الشركات" in subject
+        or "شركات" in subject
+        or "الخارجية" in subject
+        or "خارجية" in subject
+        or "الخارجيه" in subject
+        or "خارجيه" in subject
+        or "فاتوره" in subject
+        or "فاتورة" in subject
+        or "فواتير" in subject
+    ):
+        category = "الشركات الخارجية"
+
     elif "تعيين" in subject or "تعين" in subject or "وثقية" in subject:
         category = "Staff - الموظفين"
     else:
         category = "Others - أخرى"
 
     return (category, sub_category)
-
-
-def get_partitions_letters():
-    partitions = psutil.disk_partitions()
-    partitions_letters = []
-    for partition in partitions:
-        partitions_letters.append(partition.mountpoint.replace(":\\", ""))
-
-    return partitions_letters
 
 
 def main():
@@ -83,9 +101,14 @@ def main():
     output_dir = Path(f"{save_partition}:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    counter = 0
+    print(f"\n\t 🔁 Start Extracting: {len(list(inbox.items))} Mails\n")  # type: ignore
+
     for item in list(inbox.items):  # type: ignore
+        counter = counter + 1
         category, sub_category = generate_category(str(item.subject))
         try:
+            print(f"Mail {counter} from {item.sender}")
             compound = (
                 str(item.sender)
                 .lower()
