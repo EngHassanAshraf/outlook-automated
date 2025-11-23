@@ -1,3 +1,6 @@
+# to correctly display arabic language in terminal
+from bidi.algorithm import get_display
+
 from datetime import date
 from pathlib import Path
 
@@ -13,28 +16,31 @@ class AttachmentPath:
         return path.replace("\\\\", "\\")
 
 
-class Message:
+class Mail:
 
     def __init__(self, message):
-        self.message = message
+        self.mail = message
 
-    def get_message_attachments(self):
-        return self.message.attachments
+    def get_mail_attachments(self):
+        return self.mail.attachments
 
-    def move_message(self, folder, unread=False):
+    def move_mail(self, folder):
         """
-        If unread is True it will move all messages even if it is unread
-        else unread is False by default so that move onle the message  if it's read
+        move mail to the given folder
         """
 
         try:
-            if unread:
-                self.message.Move(folder)
-            elif not self.message.unread:
-                self.message.Move(folder)
-            print(f"\t☑️ {self.message.subject}")
+            self.mail.Move(folder)
+            print(f"\t☑️ {get_display(self.mail.subject)}")
         except Exception as e:
             print(f"\n🤯 Faced error while trying to move the email to {folder}: {e}\n")
+
+    def mark_read(self):
+        self.mail.Unread = False
+        self.mail.Save()
+
+    def is_read(self):
+        return not self.mail.unread
 
 
 class Attachment:

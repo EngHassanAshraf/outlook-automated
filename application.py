@@ -8,10 +8,11 @@ class Connection:
 
     def connect(self):
         try:
-            print("🤌 Connecting...\n")
-            d = Dispatch(self.application)
-            print("✅ Connected Successfully\n")
-            return d
+            print("\n🤌 Connecting To Outlook...")
+            dispateched = Dispatch(self.application)
+            if dispateched:
+                print("✅ Connected Successfully")
+            return dispateched
         except Exception as e:
             print(f"\n🤯 Faced an error while connecting: {e}\n")
 
@@ -23,19 +24,21 @@ class Connection:
 
 
 class Folder:
+    _default_folders = {"6": "Inbox"}
+
     def __init__(self, namespace):
         self.namespace = namespace
 
-    def get_default_folder(self, folder_number):
+    def get_by_number(self, folder_number):
         try:
-            print(f"\n😉 Folder {folder_number} opened")
+            print(f"😉 Folder {self._default_folders[str(folder_number)]} opened")
             return self.namespace.GetDefaultFolder(folder_number)
         except Exception as e:
             print("\n🤯 Faced an error while openning the folder: {e}\n")
 
-    def get_folder(self, root_folder, folder_name):
+    def get_by_name(self, root_folder, folder_name):
         try:
-            print(f"😉 Folder {root_folder}.{folder_name} opened\n")
+            print(f"😉 Folder {root_folder}.{folder_name} opened")
             return self.namespace.Folders(root_folder).Folders(folder_name)
         except Exception as e:
             print("\n🤯 Faced an error while openning the folder: {e}\n")

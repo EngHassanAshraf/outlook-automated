@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import date
 
 from application import Connection, Folder
-from message import Message, Attachment, AttachmentPath
+from message import Mail, Attachment, AttachmentPath
 
 import psutil
 import sys
@@ -62,7 +62,8 @@ def generate_category(subject):
         or "فواتير" in subject
     ):
         category = "الشركات الخارجية"
-
+    elif "التشغيلة" in subject:
+        category = "التشغيلات الاسبوعية"
     elif "تعيين" in subject or "تعين" in subject or "وثقية" in subject:
         category = "Staff - الموظفين"
     else:
@@ -71,87 +72,154 @@ def generate_category(subject):
     return (category, sub_category)
 
 
-def main():
-    # get the partition to save to from the user input
-    if len(sys.argv) > 1:
-        save_partition = str(sys.argv[1]).upper()
-    else:
-        save_partition = input(
-            "\n👌 Please Enter partition letter to save to: "
-        ).upper()
-
-    partitions_letters = get_partitions_letters()
-    while save_partition not in partitions_letters:
-        print(f"\n😴 Available Partitions are {partitions_letters}")
-        save_partition = input(
-            "👌 Please, Enter a valid Partition Letter to save to: "
-        ).upper()
-        print()
-
-    unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
-    print()
-
+def get_outlook_folders():
     connect = Connection("Outlook.Application", "MAPI")
     outlook_namespace = connect.get_namespace()
     outlook_folders = Folder(outlook_namespace)
 
-    inbox = outlook_folders.get_default_folder(folder_number=6)
-    archive = outlook_folders.get_folder(root_folder="Archives", folder_name="Archive")
+    inbox = outlook_folders.get_by_number(folder_number=6)
+    archive = outlook_folders.get_by_name(root_folder="Archives", folder_name="Archive")
 
-    output_dir = Path(f"{save_partition}:\\MV\\MV-{date.today().year}\\")
+    return inbox, archive
+
+
+def validate_user_partition(user_parition):
+    partitions_letters = get_partitions_letters()
+    if user_parition in partitions_letters:
+        return user_parition
+    return 0
+
+
+def get_user_partiton():
+    partitions_letters = get_partitions_letters()
+    if len(sys.argv) > 1:
+        user_partition = str(sys.argv[1]).upper()
+    else:
+        user_partition = input(
+            "\n👌 Please Enter partition letter to save to: "
+        ).upper()
+
+    while not validate_user_partition(user_partition):
+        print(f"\n😴 Available Partitions are {partitions_letters}")
+        user_partition = input(
+            "👌 Please, Enter a valid Partition Letter to save to: "
+        ).upper()
+        print()
+
+    return user_partition
+
+
+def get_output_dir(user_partition):
+    output_dir = Path(f"{user_partition}:\\MV\\MV-{date.today().year}\\")
     output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
 
+
+def save_attachments(mail, attachments, output_dir, category, sub_category, compound):
+
+    for attachment in attachments:
+
+        attachment_instance = Attachment(attachment)
+
+        if not attachment_instance.is_ignored() and attachment_instance.accepted_type():
+            folder_path = AttachmentPath().attachment_path(
+                output_dir=output_dir,
+                category=category,
+                sub_category=sub_category,
+                compound=compound,
+                month=attachment_instance.attachment_month(mail),
+            )
+            file_path = attachment_instance.attachment_folder(folder_path)
+            attachment_instance.save_attachment(file_path)
+
+
+def extracting_msg(inbox, unread_flag):
+    if unread_flag:
+        items = inbox.items
+        if len(items):
+            print(f"\n\t🔁 Start Extracting all {len(items)} Mails")
+        else:
+            print(f"\n\t🤔 {len(items)} Mails")
+
+    else:
+        items = []
+        items = [item for item in inbox.items if not item.unread]
+        if items:
+            print(f"\n\t🔁 Start Extracting {len(items)} Read Mails")
+        else:
+            print(f"\n\t🤔 {len(items)} Read Mails")
+
+
+def get_compound(mail):
+    return (
+        str(mail.mail.sender)
+        .lower()
+        .replace(" security", "")
+        .replace(" buildingsecurity", "")
+        .upper()
+    )
+
+
+def process_mail(item, archive, output_dir, counter, unread_flag):
+    if item.unread and unread_flag != "Y":
+        return counter
+
+    mail_message = Mail(item)
+    category, sub_category = generate_category(str(mail_message.mail.subject))
+    try:
+        counter += 1
+        print(f"\nMail {counter} from {mail_message.mail.sender}")
+
+        compound = get_compound(mail_message)
+
+        if compound == "CONDOLENCES":
+            mail_message.mark_read()
+            mail_message.move_mail(archive)
+            return counter
+
+        attachments = mail_message.get_mail_attachments()
+
+        save_attachments(
+            mail_message.mail,
+            attachments,
+            output_dir,
+            category,
+            sub_category,
+            compound,
+        )
+
+        mail_message.move_mail(archive)
+    except Exception as e:
+        print(f"\n🤯 {e}\n")
+
+    return counter
+
+
+def process_all_mails(inbox, archive, output_dir, unread_flag):
     counter = 0
-    print(f"\n\t 🔁 Start Extracting: {len(list(inbox.items))} Mails\n")  # type: ignore
+    items = list(inbox.items)  # type: ignore
 
-    for item in list(inbox.items):  # type: ignore
-        counter = counter + 1
-        category, sub_category = generate_category(str(item.subject))
-        try:
-            print(f"Mail {counter} from {item.sender}")
-            compound = (
-                str(item.sender)
-                .lower()
-                .replace(" security", "")
-                .replace(" buildingsecurity", "")
-                .upper()
-            )
-            message = Message(item)
-            if compound == "CONDOLENCES":
-                message.move_message(
-                    folder=archive,
-                    unread=(True if unread == "Y" else False),
-                )
-                continue
+    for item in items:  # type: ignore
+        counter = process_mail(item, archive, output_dir, counter, unread_flag)
+    return counter
 
-            attachments = message.get_message_attachments()
-            for attachment in attachments:
-                attachment_instance = Attachment(attachment)
-                if (
-                    not attachment_instance.is_ignored()
-                    and attachment_instance.accepted_type()
-                ):
 
-                    folder_path = AttachmentPath().attachment_path(
-                        output_dir=output_dir,
-                        category=category,
-                        sub_category=sub_category,
-                        compound=compound,
-                        month=attachment_instance.attachment_month(item),
-                    )
-                    file_path = attachment_instance.attachment_folder(folder_path)
-                    attachment_instance.save_attachment(file_path=file_path)
-            message.move_message(
-                folder=archive,
-                unread=(True if unread == "Y" else False),
-            )
-        except Exception as e:
-            print(f"\n🤯 {e}\n")
-
-    if unread == "Y":
+def print_summary(unread_flag):
+    if unread_flag == "Y":
         print("\n🎊 All mails moved to Archive folder and its attachments saved\n")
     else:
         print("\n🎊 All read mails moved to Archive folder and its attachments saved\n")
+
+
+def main():
+    user_partition = get_user_partiton()
+    output_dir = get_output_dir(user_partition)
+    inbox, archive = get_outlook_folders()
+    unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
+
+    extracting_msg(inbox, unread)
+    process_all_mails(inbox, archive, output_dir, unread)
+    print_summary(unread)
 
 
 if __name__ == "__main__":

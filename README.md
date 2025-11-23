@@ -11,9 +11,13 @@ from different senders
 
 Using **win32com** lib from the [pywin32](https://pypi.org/project/pywin32/) package to dispatch Outlook using MAPI (Messaging Application Programming Interface) over HTTP protocol so that we can exchange connections between our tool and Outlook app
 
-## psutil (process and system utilities) Module
+## [psutil](https://pypi.org/project/psutil/) (process and system utilities) Library
 
-A cross-platform library for retrieving information on running processes and system utilization (CPU, memory, disks, network, sensors) in Python. I'm using it to get system partitions letters to check user's entered letter.
+A cross-platform library for retrieving information on running processes and system utilization (CPU, memory, disks, network, sensors) in Python. I'm using it to get system partitions' letters to validate user's inputted letter.
+
+## [python-bidi](https://pypi.org/project/python-bidi/) Library
+
+To reorder arabic charachers in memory to make them display correctly in terminal that doesn't support the Bidi, it implements the **Unicode Bidirectional Algorithm (Bidi)**
 
 ## Future Features
 
