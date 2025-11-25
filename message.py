@@ -9,10 +9,10 @@ class AttachmentPath:
 
     def attachment_path(self, output_dir, category, compound, month, sub_category=None):
 
-        if "Tech" in category:
+        if "Tech" in category or category == "التشغيلات الاسبوعية":
             week_number = (int(date.today().day) - 1) // 7 + 1
 
-        path = f"{output_dir}\\{category}\\{compound}\\{sub_category if sub_category else ''}\\{month}\\{'week '+str(week_number) if "Tech" in category else ''}"
+        path = f"{output_dir}\\{category}\\{compound}\\{sub_category if sub_category else ''}\\{month}\\{'week '+str(week_number) if "Tech" in category or category == "التشغيلات الاسبوعية" else ''}"
         return path.replace("\\\\", "\\")
 
 
