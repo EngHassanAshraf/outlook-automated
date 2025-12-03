@@ -31,14 +31,14 @@ class Folder:
 
     def get_by_number(self, folder_number):
         try:
-            print(f"😉 Folder {self._default_folders[str(folder_number)]} opened")
+            print(f"😉 {self._default_folders[str(folder_number)]} Folder opened")
             return self.namespace.GetDefaultFolder(folder_number)
         except Exception as e:
             print("\n🤯 Faced an error while openning the folder: {e}\n")
 
     def get_by_name(self, root_folder, folder_name):
         try:
-            print(f"😉 Folder {root_folder}.{folder_name} opened")
+            print(f"😉 {root_folder}.{folder_name} Folder opened")
             return self.namespace.Folders(root_folder).Folders(folder_name)
         except Exception as e:
             print("\n🤯 Faced an error while openning the folder: {e}\n")

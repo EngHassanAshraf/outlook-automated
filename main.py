@@ -76,7 +76,7 @@ def get_outlook_folders():
     connect = Connection("Outlook.Application", "MAPI")
     outlook_namespace = connect.get_namespace()
     outlook_folders = Folder(outlook_namespace)
-
+    print("\n🤌 Opening Folders")
     inbox = outlook_folders.get_by_number(folder_number=6)
     archive = outlook_folders.get_by_name(root_folder="Archives", folder_name="Archive")
 
@@ -134,7 +134,7 @@ def save_attachments(mail, attachments, output_dir, category, sub_category, comp
 
 
 def extracting_msg(inbox, unread_flag):
-    if unread_flag:
+    if unread_flag == "Y" or unread_flag == "y":
         items = inbox.items
         if len(items):
             print(f"\n\t🔁 Start Extracting all {len(items)} Mails")
@@ -161,6 +161,7 @@ def get_compound(mail):
 
 
 def process_mail(item, archive, output_dir, counter, unread_flag):
+
     if item.unread and unread_flag != "Y":
         return counter
 
@@ -205,7 +206,7 @@ def process_all_mails(inbox, archive, output_dir, unread_flag):
 
 
 def print_summary(unread_flag):
-    if unread_flag == "Y":
+    if unread_flag == "Y" or unread_flag == "y":
         print("\n🎊 All mails moved to Archive folder and its attachments saved\n")
     else:
         print("\n🎊 All read mails moved to Archive folder and its attachments saved\n")
@@ -215,7 +216,16 @@ def main():
     user_partition = get_user_partiton()
     output_dir = get_output_dir(user_partition)
     inbox, archive = get_outlook_folders()
-    unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
+    is_unread = False
+    for item in list(inbox.items):
+        if item.unread:
+            is_unread = True
+            break
+
+    if is_unread:
+        unread = input("\n👀 Save and Archive unread mails? Y(es)/N(o): ")
+    else:
+        unread = False
 
     extracting_msg(inbox, unread)
     process_all_mails(inbox, archive, output_dir, unread)
