@@ -1,27 +1,44 @@
-# Microsoft Outlook Automated
+# Project Documentation
 
-## Description
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/EngHassanAshraf/outlook-automated.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd outlook-automated
+   ```
+3. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-A python tool helps me automating the daily boring stuff like saving emails' attachments and archiving emails
-from different senders
-> [!Note]
-> This tool is still under development and testing so that in some lines there is a hard coded conditions and folder names, there will be a user inputs to enter and select different things
+## Usage
+After installation, you can use the project by running:
+```bash
+python main.py
+```
 
-## Pywin32 Package
+## Features
+- Feature 1: Automatic email management.
+- Feature 2: Schedule email sending.
+- Feature 3: Integration with various email services.
+- Feature 4: User-friendly interface.
 
-Using **win32com** lib from the [pywin32](https://pypi.org/project/pywin32/) package to dispatch Outlook using MAPI (Messaging Application Programming Interface) over HTTP protocol so that we can exchange connections between our tool and Outlook app
+## Project Structure
+- `main.py`: Entry point of the application.
+- `utils/`: Contains utility functions.
+- `models/`: Contains data models for the application.
+- `requirements.txt`: Lists all dependencies.
 
-## [psutil](https://pypi.org/project/psutil/) (process and system utilities) Library
+## Dependencies Explanation
+- `requests`: For making HTTP requests.
+- `flask`: For creating web services.
 
-A cross-platform library for retrieving information on running processes and system utilization (CPU, memory, disks, network, sensors) in Python. I'm using it to get system partitions' letters to validate user's inputted letter.
+## System Requirements
+- Python 3.6 or higher.
+- Windows/Linux/Mac OS.
+- Internet connection for email services.
 
-## [python-bidi](https://pypi.org/project/python-bidi/) Library
-
-To reorder arabic charachers in memory to make them display correctly in terminal that doesn't support the Bidi, it implements the **Unicode Bidirectional Algorithm (Bidi)**
-
-## Future Features
-
-- [x] Save emails' attachments dependant on user inputs
-  - users determin the partition to save to and decide to save unread mails or not
-- [ ] Read each attachment, parse its content and gather useful data
-- [ ] Use gathered data to make weekly useful Excel sheets
+---
