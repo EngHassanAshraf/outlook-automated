@@ -1,177 +1,200 @@
+import logging
+import re
+from typing import Any, Optional, TYPE_CHECKING
+
 # to correctly display arabic language in terminal
 from bidi.algorithm import get_display
 
 from datetime import date
 from pathlib import Path
 
+from config_manager import config
+
+if TYPE_CHECKING:
+    from progress_ui import ProgressUI
+
+# Module-level UI reference. Set by main.py before processing begins so that
+# Mail.move_mail() can push events into the live panel instead of printing.
+_ui: Optional["ProgressUI"] = None
+
+
+def set_ui(ui: Optional["ProgressUI"]) -> None:
+    """Register the active ProgressUI instance for this module."""
+    global _ui
+    _ui = ui
+
 
 class AttachmentPath:
+    """Handles building attachment file paths."""
 
-    def attachment_path(self, output_dir, category, compound, month, sub_category=None):
+    def attachment_path(
+        self,
+        output_dir: Path,
+        category: str,
+        compound: str,
+        month: str,
+        sub_category: Optional[str] = None,
+    ) -> str:
+        """
+        Build the full folder path for saving an attachment.
+
+        Args:
+            output_dir:   Base output directory.
+            category:     Email category.
+            compound:     Sender compound name.
+            month:        Month string, e.g. "4. April".
+            sub_category: Optional sub-category.
+
+        Returns:
+            Full folder path string.
+        """
+        week_number: Optional[int] = None
 
         if "Tech" in category or category == "التشغيلات الاسبوعية":
             week_number = (int(date.today().day) - 1) // 7 + 1
 
-        path = f"{output_dir}\\{category}\\{compound}\\{sub_category if sub_category else ''}\\{month}\\{'week '+str(week_number) if "Tech" in category or category == "التشغيلات الاسبوعية" else ''}"
+        sub_category_str = sub_category if sub_category else ""
+        week_str = f"week {week_number}" if week_number else ""
+
+        path = f"{output_dir}\\{category}\\{compound}\\{sub_category_str}\\{month}\\{week_str}"
         return path.replace("\\\\", "\\")
 
 
 class Mail:
+    """Handles email message operations."""
 
-    def __init__(self, message):
+    def __init__(self, message: Any):
         self.mail = message
 
-    def get_mail_attachments(self):
+    def get_mail_attachments(self) -> Any:
+        """Return the attachments collection of this email."""
         return self.mail.attachments
 
-    def move_mail(self, folder):
+    def move_mail(self, folder: Any) -> bool:
         """
-        move mail to the given folder
-        """
+        Move this email to *folder*.
 
+        Pushes a ☑ line into the live UI panel (or falls back to logging
+        if the UI is not active).
+
+        Returns:
+            True on success, False on failure.
+        """
         try:
+            subject = str(self.mail.subject)
             self.mail.Move(folder)
-            print(f"\t☑️ {get_display(self.mail.subject)}")
-        except Exception as e:
-            print(f"\n🤯 Faced error while trying to move the email to {folder}: {e}\n")
+            logging.info(f"Archived: {subject}")
+            if _ui is not None:
+                _ui.notify(f"☑  {get_display(subject)}")
+            return True
+        except Exception as exc:
+            logging.error(f"Error moving email: {exc}")
+            if _ui is not None:
+                _ui.error(f"✗  Move failed: {exc}")
+            return False
 
-    def mark_read(self):
-        self.mail.Unread = False
-        self.mail.Save()
+    def mark_read(self) -> bool:
+        """Mark this email as read."""
+        try:
+            self.mail.Unread = False
+            self.mail.Save()
+            logging.info(f"Marked as read: {self.mail.subject}")
+            return True
+        except Exception as exc:
+            logging.error(f"Error marking email as read: {exc}")
+            return False
 
-    def is_read(self):
+    def is_read(self) -> bool:
+        """Return True if the email has been read."""
         return not self.mail.unread
 
 
 class Attachment:
+    """Handles email attachment operations."""
 
-    def __init__(self, attachment):
+    _DATE_PATTERNS = [
+        re.compile(r'(?P<year>\d{4})[._-](?P<month>\d{1,2})[._-](?P<day>\d{1,2})'),  # YYYY-MM-DD
+        re.compile(r'(?P<day>\d{1,2})[._-](?P<month>\d{1,2})[._-](?P<year>\d{4})'),  # DD-MM-YYYY
+        re.compile(r'(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})'),                 # YYYYMMDD
+        re.compile(r'(?P<day>\d{2})(?P<month>\d{2})(?P<year>\d{4})'),                 # DDMMYYYY
+    ]
+
+    def __init__(self, attachment: Any):
         self.attachment = attachment
 
-    def is_ignored(self):
-        ignored_files = [
-            "EmailSignature-International_N_374acb21-a63f-4e28-ac6f-11c4b255b559.jpg",
-            "fb-resized_1_08ab0129-1fbf-4e09-9caf-52e1f3fb8718.png",
-            "insta-resized_2040ce31-0940-4a34-a926-c5194e1f7f3c.png",
-            "linkedin-resized_7fce048f-c49e-4e77-8e1d-bbfbcd6aaaf1.png",
-            "image001.png",
-            "image002.png",
-            "image003.png",
-            "image004.png",
-            "image005.png",
-            "image006.png",
-            "image007.png",
-            "image008.png",
-            "image009.png",
-            "image010.png",
-            "image011.png",
-            "image012.png",
-            "image013.png",
-            "image014.png",
-            "image015.png",
-            "image016.png",
-            "image017.png",
-            "image018.png",
-            "image019.png",
-            "image020.png",
-            "image021.png",
-            "image022.png",
-            "image023.png",
-            "image024.png",
-            "image025.png",
-            "image026.png",
-            "image027.png",
-            "image028.png",
-            "image029.png",
-            "image030.png",
-            "image031.png",
-            "image032.png",
-            "image033.png",
-            "image034.png",
-            "image035.png",
-            "image036.png",
-            "image037.png",
-            "image038.png",
-            "image039.png",
-            "image001.jpg",
-            "image002.jpg",
-            "image003.jpg",
-            "image004.jpg",
-            "image005.jpg",
-            "image006.jpg",
-            "image007.jpg",
-            "image008.jpg",
-            "image009.jpg",
-            "image010.jpg",
-            "image011.jpg",
-            "image012.jpg",
-            "image013.jpg",
-            "image014.jpg",
-            "image015.jpg",
-            "image016.jpg",
-            "image017.jpg",
-            "image018.jpg",
-            "image019.jpg",
-            "image020.jpg",
-            "image021.jpg",
-            "image022.jpg",
-            "image023.jpg",
-            "image024.jpg",
-            "image025.jpg",
-            "image026.jpg",
-            "image027.jpg",
-            "image028.jpg",
-            "image029.jpg",
-            "image030.jpg",
-            "image031.jpg",
-            "image032.jpg",
-            "image033.jpg",
-            "image034.jpg",
-            "image035.jpg",
-            "image036.jpg",
-            "image037.jpg",
-            "image038.jpg",
-            "image039.jpg",
-        ]
-        return str(self.attachment.filename) in ignored_files
+    def is_ignored(self) -> bool:
+        """Return True if this attachment is on the ignore list."""
+        return str(self.attachment.filename) in config.get_ignored_files()
 
-    def accepted_type(self):
-        ext = ["docx", "pdf", "xlsx", "pptx"]
-        attachment_type = str(self.attachment.filename).split(".")[-1]
-        return attachment_type in ext
-
-    def attachment_month(self, item):
-
+    def accepted_type(self) -> bool:
+        """Return True if the attachment's file extension is accepted."""
         filename = str(self.attachment.filename)
-        for letter in filename:
-            if not letter.isnumeric() and letter != "-" and letter != ".":
-                filename = filename.replace(letter, "")
+        if "." not in filename:
+            return False
+        return filename.rsplit(".", 1)[-1].lower() in config.get_accepted_types()
 
-        init_date = filename.replace(".", "-").strip("-").strip()
-        if not init_date[-4:].isnumeric():
-            if init_date != 0:
-                init_date = init_date[:-2]
-        date_list = init_date.split("-")
-        month_number = None
-        if len(date_list) >= 3:
-            month_number = init_date.split("-")[-2] or 0
-            month_number = int(month_number)
+    def attachment_month(self, item: Any) -> str:
+        """
+        Determine the month for this attachment.
 
-        if month_number not in [month for month in range(1, 13)]:
+        Tries common date patterns in the filename; falls back to ReceivedTime.
+
+        Returns:
+            Month string in the format "N. MonthName" (e.g. "4. April").
+        """
+        filename = str(self.attachment.filename)
+        month_number: Optional[int] = None
+
+        for pattern in self._DATE_PATTERNS:
+            match = pattern.search(filename)
+            if match:
+                try:
+                    candidate = int(match.group('month'))
+                    if 1 <= candidate <= 12:
+                        month_number = candidate
+                        break
+                except (ValueError, IndexError):
+                    continue
+
+        if month_number is None:
             month_number = item.ReceivedTime.month
 
-        dt = date(2000, month_number, 1)
-        month_name = dt.strftime("%B")
+        month_name = date(2000, month_number, 1).strftime("%B")
         return f"{month_number}. {month_name}"
 
-    def attachment_folder(self, path):
-        path = Path(path)
-        path.mkdir(parents=True, exist_ok=True)
-        file_path = str(path.absolute()) + "\\" + str(self.attachment.filename)
-        return file_path
+    def attachment_folder(self, path: str) -> str:
+        """
+        Create the folder and return a collision-safe file path.
 
-    def save_attachment(self, file_path):
-        if not self.is_ignored() and self.accepted_type():
+        Appends (1), (2), … before the extension if the file already exists.
+        """
+        path_obj = Path(path)
+        path_obj.mkdir(parents=True, exist_ok=True)
+
+        filename = str(self.attachment.filename)
+        target = path_obj / filename
+
+        if target.exists():
+            stem, suffix = target.stem, target.suffix
+            counter = 1
+            while target.exists():
+                target = path_obj / f"{stem}({counter}){suffix}"
+                counter += 1
+            msg = f"⚠  Collision: saved as {target.name}"
+            logging.warning(msg)
+            if _ui is not None:
+                _ui.warn(msg)
+
+        return str(target)
+
+    def save_attachment(self, file_path: str) -> bool:
+        """Save this attachment to *file_path*."""
+        try:
             self.attachment.SaveAsFile(file_path)
-        elif not self.accepted_type():
-            print(f"\n⁉️ Unsupported Attachment Type. '{self.attachment.filename}'\n")
+            logging.info(f"Saved: {Path(file_path).name}")
+            return True
+        except Exception as exc:
+            logging.error(f"Error saving '{file_path}': {exc}")
+            if _ui is not None:
+                _ui.error(f"✗  Save failed: {Path(file_path).name}")
+            return False
