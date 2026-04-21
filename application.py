@@ -1,44 +1,103 @@
+import logging
+from typing import Any
+
 from win32com.client import Dispatch
 
 
 class Connection:
-    def __init__(self, application, namesapce):
+    """Handles connection to Outlook application via COM."""
+    
+    def __init__(self, application: str, namespace: str):
+        """
+        Initialize Outlook connection.
+        
+        Args:
+            application: Outlook application name (e.g., "Outlook.Application")
+            namespace: Namespace type (e.g., "MAPI")
+        """
         self.application = application
-        self.namespace = namesapce
+        self.namespace = namespace
 
-    def connect(self):
+    def connect(self) -> Any:
+        """
+        Connect to Outlook application.
+        
+        Returns:
+            Dispatched Outlook application object, or None on failure
+        """
         try:
-            print("\n🤌 Connecting To Outlook...")
-            dispateched = Dispatch(self.application)
-            if dispateched:
-                print("✅ Connected Successfully")
-            return dispateched
+            logging.info("Connecting to Outlook...")
+            dispatched = Dispatch(self.application)
+            if dispatched:
+                logging.info("Connected to Outlook successfully")
+            return dispatched
         except Exception as e:
-            print(f"\n🤯 Faced an error while connecting: {e}\n")
+            logging.error(f"Error connecting to Outlook: {e}")
+            return None
 
-    def get_namespace(self):
+    def get_namespace(self) -> Any:
+        """
+        Get Outlook namespace.
+        
+        Returns:
+            Outlook namespace object, or None on failure
+        """
         try:
-            return self.connect().GetNameSpace(self.namespace)
+            outlook_app = self.connect()
+            if outlook_app:
+                return outlook_app.GetNameSpace(self.namespace)
+            return None
         except Exception as e:
-            print(f"\n🤯 Faced an error while getting the namespace: {e}\n")
+            logging.error(f"Error getting namespace: {e}")
+            return None
 
 
 class Folder:
+    """Handles Outlook folder operations."""
+    
     _default_folders = {"6": "Inbox"}
 
-    def __init__(self, namespace):
+    def __init__(self, namespace: Any):
+        """
+        Initialize Folder manager.
+        
+        Args:
+            namespace: Outlook namespace object
+        """
         self.namespace = namespace
 
-    def get_by_number(self, folder_number):
+    def get_by_number(self, folder_number: int) -> Any:
+        """
+        Get folder by its default number.
+        
+        Args:
+            folder_number: Outlook default folder number (e.g., 6 for Inbox)
+            
+        Returns:
+            Folder object, or None on failure
+        """
         try:
-            print(f"😉 {self._default_folders[str(folder_number)]} Folder opened")
+            folder_name = self._default_folders.get(str(folder_number), "Unknown")
+            logging.info(f"Opening folder: {folder_name} (#{folder_number})")
             return self.namespace.GetDefaultFolder(folder_number)
         except Exception as e:
-            print("\n🤯 Faced an error while openning the folder: {e}\n")
+            logging.error(f"Error opening folder #{folder_number}: {e}")
+            return None
 
-    def get_by_name(self, root_folder, folder_name):
+    def get_by_name(self, root_folder: str, folder_name: str) -> Any:
+        """
+        Get folder by name from a specific root folder.
+        
+        Args:
+            root_folder: Root folder name (e.g., "Archives")
+            folder_name: Folder name within root
+            
+        Returns:
+            Folder object, or None on failure
+        """
         try:
-            print(f"😉 {root_folder}.{folder_name} Folder opened")
+            logging.info(f"Opening folder: {root_folder}\\{folder_name}")
             return self.namespace.Folders(root_folder).Folders(folder_name)
         except Exception as e:
-            print("\n🤯 Faced an error while openning the folder: {e}\n")
+            logging.error(f"Error opening folder {root_folder}\\{folder_name}: {e}")
+            return None
